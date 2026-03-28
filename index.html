@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XR開発 チートシート｜World API / Cesium / Omma / KIRI Engine</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #080c12;
+    --bg2: #0d1420;
+    --bg3: #121b2a;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(255,255,255,0.15);
+    --text: #e2e8f0;
+    --muted: #6b7f99;
+    --dim: #3a4a60;
+
+    --cyan:   #00d4ff;
+    --green:  #00ff88;
+    --amber:  #ffb800;
+    --rose:   #ff4d8f;
+    --violet: #a78bfa;
+    --sky:    #38bdf8;
+    --earth:  #4ade80;
+
+    --cyan-dim:   rgba(0,212,255,0.12);
+    --green-dim:  rgba(0,255,136,0.10);
+    --amber-dim:  rgba(255,184,0,0.10);
+    --rose-dim:   rgba(255,77,143,0.10);
+    --violet-dim: rgba(167,139,250,0.10);
+    --earth-dim:  rgba(74,222,128,0.10);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .wrapper { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* ── HEADER ── */
+  header {
+    display: flex; flex-direction: column; gap: 8px;
+    border-bottom: 1px solid var(--border-bright);
+    padding-bottom: 28px; margin-bottom: 36px;
+  }
+  .header-top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: .12em;
+    padding: 3px 10px; border-radius: 4px;
+    border: 1px solid var(--cyan);
+    color: var(--cyan); background: var(--cyan-dim);
+    text-transform: uppercase; white-space: nowrap;
+  }
+  .badge a { color: inherit; text-decoration: none; }
+  .badge a:hover { text-decoration: underline; }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(22px, 4vw, 38px);
+    font-weight: 800; letter-spacing: -.02em;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 0%, var(--cyan) 60%, var(--violet) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--muted); letter-spacing: .08em;
+  }
+
+  /* ── FILTER ── */
+  .filter-bar {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 28px;
+  }
+  .filter-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: .1em;
+    padding: 5px 14px; border-radius: 20px;
+    border: 1px solid var(--border-bright);
+    background: transparent; color: var(--muted);
+    cursor: pointer; transition: all .2s;
+    text-transform: uppercase;
+  }
+  .filter-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+  .filter-btn.active { background: var(--cyan-dim); border-color: var(--cyan); color: var(--cyan); }
+
+  /* ── SECTION HEADING ── */
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: .18em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* ── GRID ── */
+  .grid { display: grid; gap: 12px; margin-bottom: 40px; }
+  .grid-2 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .grid-full { grid-template-columns: 1fr; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    transition: border-color .2s, transform .15s;
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    opacity: 0; transition: opacity .2s;
+  }
+  .card:hover { border-color: var(--border-bright); transform: translateY(-1px); }
+  .card:hover::before { opacity: 1; }
+
+  .card.cyan  { --accent: var(--cyan);   --accent-dim: var(--cyan-dim);   }
+  .card.green { --accent: var(--green);  --accent-dim: var(--green-dim);  }
+  .card.amber { --accent: var(--amber);  --accent-dim: var(--amber-dim);  }
+  .card.rose  { --accent: var(--rose);   --accent-dim: var(--rose-dim);   }
+  .card.violet{ --accent: var(--violet); --accent-dim: var(--violet-dim); }
+  .card.earth { --accent: var(--earth);  --accent-dim: var(--earth-dim);  }
+
+  .card::before { background: var(--accent); }
+  .card:hover   { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+
+  .card-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); background: var(--accent-dim);
+    padding: 2px 8px; border-radius: 3px;
+    display: inline-block; margin-bottom: 10px;
+  }
+  .card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 8px; color: #fff;
+  }
+  .card p { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+
+  .card a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent, var(--cyan)) 50%, transparent);
+    text-underline-offset: 2px;
+    transition: color .2s, text-decoration-color .2s;
+  }
+  .card a:hover {
+    color: var(--accent, var(--cyan));
+    text-decoration-color: var(--accent, var(--cyan));
+  }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+  .checklist li {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 12px; color: var(--text);
+  }
+  .checklist li::before {
+    content: '▸';
+    color: var(--accent);
+    font-size: 10px; margin-top: 2px; flex-shrink: 0;
+  }
+  .checklist li strong { color: #fff; font-weight: 500; }
+  .checklist li .note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--muted);
+    display: block; margin-top: 1px;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--text);
+    overflow-x: auto;
+    margin: 10px 0;
+    white-space: pre;
+  }
+  .code-block .comment { color: var(--dim); }
+  .code-block .keyword { color: var(--violet); }
+  .code-block .string { color: var(--green); }
+  .code-block .func { color: var(--cyan); }
+  .code-block .num { color: var(--amber); }
+
+  /* ── DECISION TABLE ── */
+  .decision-table { width: 100%; border-collapse: collapse; }
+  .decision-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left; background: var(--bg3);
+  }
+  .decision-table td {
+    font-size: 12px; padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .decision-table tr:last-child td { border-bottom: none; }
+  .decision-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .decision-table a {
+    color: inherit; text-decoration: underline;
+    text-decoration-color: var(--cyan); text-underline-offset: 2px;
+    transition: color .2s;
+  }
+  .decision-table a:hover { color: var(--cyan); }
+
+  .pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; padding: 2px 8px;
+    border-radius: 4px; white-space: nowrap;
+    display: inline-block;
+  }
+  .pill-cyan   { color: var(--cyan);   background: var(--cyan-dim);   }
+  .pill-green  { color: var(--green);  background: var(--green-dim);  }
+  .pill-amber  { color: var(--amber);  background: var(--amber-dim);  }
+  .pill-rose   { color: var(--rose);   background: var(--rose-dim);   }
+  .pill-violet { color: var(--violet); background: var(--violet-dim); }
+  .pill-earth  { color: var(--earth);  background: var(--earth-dim);  }
+
+  /* ── FLOW ── */
+  .flow {
+    display: flex; align-items: stretch;
+    gap: 0; flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .flow-step {
+    flex: 1; min-width: 100px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    position: relative;
+  }
+  .flow-step:first-child { border-radius: 8px 0 0 8px; }
+  .flow-step:last-child  { border-radius: 0 8px 8px 0; }
+  .flow-step:not(:last-child)::after {
+    content: '\2192';
+    position: absolute; right: -10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--cyan); font-size: 12px; z-index: 2;
+  }
+  .flow-step .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; color: var(--accent); letter-spacing: .1em;
+    margin-bottom: 4px;
+  }
+  .flow-step .name { font-size: 11px; font-weight: 500; color: #fff; }
+  .flow-step .tool { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  /* ── TIP ── */
+  .tip {
+    background: rgba(0,212,255,0.05);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-left: 3px solid var(--cyan);
+    padding: 12px 16px; border-radius: 6px;
+    font-size: 12px; color: var(--text);
+    margin-top: 12px;
+  }
+  .tip strong { color: var(--cyan); }
+  .tip a {
+    color: inherit; text-decoration: underline;
+    text-decoration-color: var(--cyan); text-underline-offset: 2px;
+    transition: color .2s;
+  }
+  .tip a:hover { color: var(--cyan); }
+  .tip.tip-amber {
+    background: rgba(255,184,0,0.05);
+    border-color: rgba(255,184,0,0.2);
+    border-left-color: var(--amber);
+  }
+  .tip.tip-amber strong { color: var(--amber); }
+  .tip.tip-green {
+    background: rgba(0,255,136,0.05);
+    border-color: rgba(0,255,136,0.2);
+    border-left-color: var(--green);
+  }
+  .tip.tip-green strong { color: var(--green); }
+  .tip.tip-rose {
+    background: rgba(255,77,143,0.05);
+    border-color: rgba(255,77,143,0.2);
+    border-left-color: var(--rose);
+  }
+  .tip.tip-rose strong { color: var(--rose); }
+  .tip.tip-violet {
+    background: rgba(167,139,250,0.05);
+    border-color: rgba(167,139,250,0.2);
+    border-left-color: var(--violet);
+  }
+  .tip.tip-violet strong { color: var(--violet); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding-top: 20px; margin-top: 40px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--dim);
+  }
+  footer a { color: var(--cyan); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  .card[data-cat] { transition: opacity .2s, transform .2s; }
+  .card.hidden    { display: none; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <span class="badge">CHEAT SHEET v2.0</span>
+    <span class="badge" style="border-color:var(--violet);color:var(--violet);background:var(--violet-dim)"><a href="https://www.ntv.co.jp/hackathon/">クリエイティブメディアハッカソン</a></span>
+  </div>
+  <h1>XR開発 ディープリファレンス</h1>
+  <p class="subtitle">// World API / CesiumJS / Omma (Spline) / KIRI Engine ── 4つの武器を深く理解する //</p>
+</header>
+
+<!-- FILTER -->
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterCards('all')">ALL</button>
+  <button class="filter-btn" onclick="filterCards('worldapi')">World API</button>
+  <button class="filter-btn" onclick="filterCards('cesium')">CesiumJS</button>
+  <button class="filter-btn" onclick="filterCards('omma')">Omma / Spline</button>
+  <button class="filter-btn" onclick="filterCards('kiri')">KIRI Engine</button>
+  <button class="filter-btn" onclick="filterCards('compare')">比較・連携</button>
+</div>
+
+
+<!-- ═══ 0. こんな人にはこのツール ═══════════════════════════════════════ -->
+<div class="grid grid-2" style="margin-bottom:40px">
+
+  <div class="card violet" data-cat="worldapi" style="border-left:3px solid var(--violet)">
+    <div class="card-tag">World API</div>
+    <h3 style="margin-bottom:12px"><a href="https://www.worldlabs.ai/blog/announcing-the-world-api">World API</a> (World Labs)</h3>
+    <p style="color:var(--violet);font-weight:700;font-size:13px;margin-bottom:10px">こんな方におすすめ:</p>
+    <ul class="checklist">
+      <li><strong>撮影できない場所・時代の3D空間が欲しい</strong><span class="note">過去の街並み・架空都市・被災前の風景など</span></li>
+      <li><strong>テキストや写真1枚から3D世界を作りたい</strong><span class="note">約30秒で生成。Free枠4回/月</span></li>
+      <li><strong>VR/Webで探索できる空間を最速で用意したい</strong><span class="note">Quest 3 / Vision Pro / ブラウザに対応</span></li>
+    </ul>
+    <div class="tip tip-violet" style="margin-top:10px"><strong>Free:</strong> 月4回 / <strong>Standard:</strong> $20/月 12回 / <strong>Pro:</strong> $35/月 25回</div>
+  </div>
+
+  <div class="card amber" data-cat="cesium" style="border-left:3px solid var(--amber)">
+    <div class="card-tag">CesiumJS</div>
+    <h3 style="margin-bottom:12px"><a href="https://cesium.com/platform/cesiumjs/">CesiumJS</a> (Cesium)</h3>
+    <p style="color:var(--amber);font-weight:700;font-size:13px;margin-bottom:10px">こんな方におすすめ:</p>
+    <ul class="checklist">
+      <li><strong>地図・地球上にデータを重ねて可視化したい</strong><span class="note">証言・災害情報・統計を地理座標で配置</span></li>
+      <li><strong>「地球→都市→現場」のズームイン体験を作りたい</strong><span class="note">Google 3D Tiles / OSM Buildings対応</span></li>
+      <li><strong>無料でブラウザ完結のデジタルアースが欲しい</strong><span class="note">OSS。10分でデプロイまで到達可能</span></li>
+    </ul>
+    <div class="tip tip-amber" style="margin-top:10px"><strong>OSS無料。</strong> Cesium ionアカウント(無料)でトークン取得 → 即利用可</div>
+  </div>
+
+  <div class="card rose" data-cat="omma" style="border-left:3px solid var(--rose)">
+    <div class="card-tag">Omma / Spline</div>
+    <h3 style="margin-bottom:12px"><a href="https://omma.build">Omma</a> (<a href="https://spline.design">Spline</a>)</h3>
+    <p style="color:var(--rose);font-weight:700;font-size:13px;margin-bottom:10px">こんな方におすすめ:</p>
+    <ul class="checklist">
+      <li><strong>3D/コーディング未経験だがリッチな3D体験を出したい</strong><span class="note">自然言語プロンプトでAIが3D+コードを同時生成</span></li>
+      <li><strong>インタラクティブなWeb3D(ホバー・クリック・アニメ)を作りたい</strong><span class="note">Splineエディタで物理演算・ゲーム操作も可</span></li>
+      <li><strong>React / Next.js プロジェクトに3Dを組み込みたい</strong><span class="note">npm パッケージで即統合。Code APIで動的制御</span></li>
+    </ul>
+    <div class="tip tip-rose" style="margin-top:10px"><strong>Splineエディタ:</strong> 無料 / <strong>Omma (AI生成):</strong> $29/月〜</div>
+  </div>
+
+  <div class="card cyan" data-cat="kiri" style="border-left:3px solid var(--cyan)">
+    <div class="card-tag">KIRI Engine</div>
+    <h3 style="margin-bottom:12px"><a href="https://www.kiriengine.app/">KIRI Engine</a></h3>
+    <p style="color:var(--cyan);font-weight:700;font-size:13px;margin-bottom:10px">こんな方におすすめ:</p>
+    <ul class="checklist">
+      <li><strong>現実の建物・物体・空間をスマホで3Dスキャンしたい</strong><span class="note">写真 / 動画 / LiDAR。15分で完了</span></li>
+      <li><strong>スキャンデータをUnity/Web/ARにすぐ使いたい</strong><span class="note">OBJ/FBX/GLB/USDZ/PLY全対応。無制限エクスポート</span></li>
+      <li><strong>3DGSだけでなくメッシュ変換もしたい</strong><span class="note">業界初の3DGS→メッシュ変換。AI PBRテクスチャ生成</span></li>
+    </ul>
+    <div class="tip" style="margin-top:10px"><strong>Basic:</strong> 無料(150枚/回・無制限エクスポート) / <strong>Pro:</strong> $17.99/月(3DGS・AI PBR対応)</div>
+  </div>
+
+</div>
+
+
+<!-- ═══ 1. 4ツール概要比較 ══════════════════════════════════════════════ -->
+<div class="section-label">01 ── 4ツール比較マトリクス</div>
+<div class="grid grid-full" style="margin-bottom:40px">
+  <div class="card cyan" data-cat="compare">
+    <div class="card-tag">COMPARISON MATRIX</div>
+    <table class="decision-table" style="width:100%">
+      <thead>
+        <tr>
+          <th>ツール</th>
+          <th>カテゴリ</th>
+          <th>主な用途</th>
+          <th>入力</th>
+          <th>出力</th>
+          <th>価格</th>
+          <th>ハッカソン適性</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong><a href="https://www.worldlabs.ai/blog/announcing-the-world-api">World API</a></strong></td>
+          <td><span class="pill pill-violet">AI 3D生成</span></td>
+          <td>テキスト・画像から3D世界を自動生成</td>
+          <td>テキスト / 画像 / 動画 / パノラマ</td>
+          <td>WebGL / glTF / USD / VR体験</td>
+          <td>Free〜$95/月</td>
+          <td><span class="pill pill-green">◎</span></td>
+        </tr>
+        <tr>
+          <td><strong><a href="https://cesium.com/platform/cesiumjs/">CesiumJS</a></strong></td>
+          <td><span class="pill pill-amber">地理空間3D</span></td>
+          <td>デジタルアース・地理データの3D可視化</td>
+          <td>3D Tiles / GeoJSON / KML / CZML</td>
+          <td>WebGL地球儀 / Unity連携</td>
+          <td>OSS無料 (ion有料枠あり)</td>
+          <td><span class="pill pill-green">◎</span></td>
+        </tr>
+        <tr>
+          <td><strong><a href="https://omma.build">Omma</a> (<a href="https://spline.design">Spline</a>)</strong></td>
+          <td><span class="pill pill-rose">AI×3Dデザイン</span></td>
+          <td>自然言語でインタラクティブ3D体験を生成</td>
+          <td>テキストプロンプト / 既存Splineシーン</td>
+          <td>Web / React / Next.js / XR</td>
+          <td>$29/月〜</td>
+          <td><span class="pill pill-green">◎</span></td>
+        </tr>
+        <tr>
+          <td><strong><a href="https://www.kiriengine.app/">KIRI Engine</a></strong></td>
+          <td><span class="pill pill-cyan">3Dスキャン</span></td>
+          <td>スマホで現実世界を3Dスキャン・3DGS化</td>
+          <td>写真 / 動画 / LiDAR</td>
+          <td>OBJ / FBX / GLB / USDZ / PLY</td>
+          <td>基本無料 / Pro $17.99/月</td>
+          <td><span class="pill pill-green">◎</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="tip"><strong>組み合わせの妙:</strong> KIRI Engineで現実をスキャン → World APIで世界を拡張 → CesiumJSで地球上に配置 → Ommaでインタラクティブ体験に仕上げる。4ツールは競合ではなく補完関係。</div>
+  </div>
+</div>
+
+
+<!-- ═══ 2. World API ═══════════════════════════════════════════════════ -->
+<div class="section-label">02 ── World API (World Labs) ディープダイブ</div>
+
+<div class="grid grid-full" style="margin-bottom:16px">
+  <div class="card violet" data-cat="worldapi">
+    <div class="card-tag">OVERVIEW</div>
+    <h3><a href="https://www.worldlabs.ai/blog/announcing-the-world-api">World API</a> ── AI駆動の3D世界生成プラットフォーム</h3>
+    <p>Fei-Fei Li率いるWorld Labsが開発。マルチモーダルワールドモデル「<a href="https://marble.worldlabs.ai/">Marble</a>」をAPI経由で利用し、テキスト・画像・動画から探索可能な3D世界を自動生成する。</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">入力モダリティ</h3>
+        <ul class="checklist">
+          <li><strong>テキストプロンプト</strong><span class="note">「廃墟の教会、朝霧」のような自然言語で世界を生成</span></li>
+          <li><strong>単一画像</strong><span class="note">1枚の写真からシーン全体を3D再構築</span></li>
+          <li><strong>複数画像</strong><span class="note">複数アングルの写真でより精密な世界を生成</span></li>
+          <li><strong>360°パノラマ</strong><span class="note">パノラマ画像から没入型環境を構築</span></li>
+          <li><strong>動画</strong><span class="note">映像から空間レイアウト・奥行き・照明を推定</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">出力・エクスポート</h3>
+        <ul class="checklist">
+          <li><strong>Webレンダリング</strong><span class="note">WebGL対応。ブラウザ上で即座に探索可能</span></li>
+          <li><strong>glTF / USD</strong><span class="note">標準3Dフォーマットでゲームエンジンに取り込み</span></li>
+          <li><strong>VR体験</strong><span class="note">Quest 3 / Vision Pro で直接表示可能</span></li>
+          <li><strong>メッシュエクスポート</strong><span class="note">3Dプリント・CAD・モデリングソフト向け</span></li>
+          <li><strong>DCC統合</strong><span class="note">Blender / Maya / 3ds Max に直接インポート</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom:16px">
+  <div class="card violet" data-cat="worldapi">
+    <div class="card-tag">CORE FEATURES</div>
+    <h3>Marble ワールドモデルの機能</h3>
+    <ul class="checklist">
+      <li><strong>生成時間 約30秒</strong><span class="note">テキスト/画像/3D構造からパノラマ生成まで</span></li>
+      <li><strong>Chisel Editor</strong><span class="note">壁・部屋・地形などの粗い3Dレイアウトを描き、AIがディテールを補完する実験的エディタ</span></li>
+      <li><strong>Expansion（拡張）</strong><span class="note">既存世界のルール・スタイルに基づいてさらに広い3D空間を自動生成</span></li>
+      <li><strong>Composer Mode</strong><span class="note">異なるスタイルの生成済み世界をつなぎ合わせて巨大空間を構築</span></li>
+      <li><strong>AI-native編集</strong><span class="note">生成後もテキスト指示で照明・テクスチャ・構造を変更可能</span></li>
+      <li><strong>ハイブリッド3Dエディタ</strong><span class="note">手動ブロックアウト → AIビジュアライゼーションの2段階ワークフロー</span></li>
+    </ul>
+  </div>
+
+  <div class="card violet" data-cat="worldapi">
+    <div class="card-tag">PRICING</div>
+    <h3>料金プラン</h3>
+    <table class="decision-table">
+      <thead><tr><th>プラン</th><th>価格</th><th>生成回数/月</th><th>備考</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Free</strong></td><td>$0</td><td>4回</td><td>テキスト・画像・パノラマ入力</td></tr>
+        <tr><td><strong>Standard</strong></td><td>$20/月</td><td>12回</td><td>マルチメディア対応 + 拡張編集</td></tr>
+        <tr><td><strong>Pro</strong></td><td>$35/月</td><td>25回</td><td>商用利用権付き</td></tr>
+        <tr><td><strong>Max</strong></td><td>$95/月</td><td>75回</td><td>全機能解放</td></tr>
+      </tbody>
+    </table>
+    <div class="tip tip-violet"><strong>ハッカソンTips:</strong> Freeプランの4回でプロトタイプを作り、必要ならStandard($20)にアップグレード。生成は約30秒なので、試行錯誤のサイクルが極めて速い。</div>
+  </div>
+</div>
+
+<div class="grid grid-full" style="margin-bottom:16px">
+  <div class="card violet" data-cat="worldapi">
+    <div class="card-tag">API WORKFLOW</div>
+    <h3>World API 利用フロー</h3>
+    <div class="flow">
+      <div class="flow-step violet">
+        <div class="num">STEP 01</div>
+        <div class="name">アカウント作成</div>
+        <div class="tool"><a href="https://marble.worldlabs.ai/">marble.worldlabs.ai</a></div>
+      </div>
+      <div class="flow-step violet">
+        <div class="num">STEP 02</div>
+        <div class="name">入力を用意</div>
+        <div class="tool">テキスト / 画像 / 動画</div>
+      </div>
+      <div class="flow-step violet">
+        <div class="num">STEP 03</div>
+        <div class="name">API呼び出し</div>
+        <div class="tool">REST API (非同期処理)</div>
+      </div>
+      <div class="flow-step violet">
+        <div class="num">STEP 04</div>
+        <div class="name">3D世界を取得</div>
+        <div class="tool">~30秒で生成完了</div>
+      </div>
+      <div class="flow-step violet">
+        <div class="num">STEP 05</div>
+        <div class="name">展開</div>
+        <div class="tool">Web / VR / エクスポート</div>
+      </div>
+    </div>
+    <div class="code-block"><span class="comment">// World API基本リクエスト（概念）</span>
+<span class="keyword">const</span> response = <span class="keyword">await</span> <span class="func">fetch</span>(<span class="string">'https://api.worldlabs.ai/v1/worlds'</span>, {
+  method: <span class="string">'POST'</span>,
+  headers: {
+    <span class="string">'Authorization'</span>: <span class="string">`Bearer ${YOUR_API_KEY}`</span>,
+    <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>
+  },
+  body: JSON.<span class="func">stringify</span>({
+    prompt: <span class="string">'戦前の広島、原爆ドーム周辺の街並み、朝の光'</span>,
+    input_type: <span class="string">'text'</span>
+  })
+});
+<span class="comment">// → 非同期でナビゲーション可能な3D世界が返却される</span>
+<span class="comment">// → WebGL埋め込み、glTF/USDエクスポート、VRビュー対応</span></div>
+    <div class="tip tip-violet"><strong>活用シーン:</strong> 「過去の風景」「被災前の街並み」「架空の未来都市」など、実写では不可能なシーンをテキスト1行で生成。3DGS（KIRIで撮影した現在）と組み合わせれば、過去↔現在の時間旅行体験が作れる。</div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom:40px">
+  <div class="card violet" data-cat="worldapi">
+    <div class="card-tag">USE CASES</div>
+    <h3>実績・ユースケース</h3>
+    <ul class="checklist">
+      <li><strong>Escape.ai</strong><span class="note">2D映画を3Dナビゲーション可能な空間に変換</span></li>
+      <li><strong>Fenestra</strong><span class="note">建築スケッチ→探索可能なウォークスルー空間</span></li>
+      <li><strong>ロボティクス・シミュレーション</strong><span class="note">NVIDIA Isaac Sim / MuJoCo向け環境を即座に生成</span></li>
+      <li><strong>ゲーム・VFX</strong><span class="note">背景環境やアトモスフェリック空間のラピッドプロトタイピング</span></li>
+      <li><strong>教育・アーカイブ</strong><span class="note">歴史的シーンのVR再現。証言テキストから空間を生成</span></li>
+    </ul>
+  </div>
+
+  <div class="card violet" data-cat="worldapi">
+    <div class="card-tag">LIMITATIONS</div>
+    <h3>制約・注意点</h3>
+    <ul class="checklist">
+      <li><strong>生成回数制限</strong><span class="note">Freeは月4回。ハッカソンでは計画的に使う</span></li>
+      <li><strong>物理的正確性</strong><span class="note">AI生成のため建築的・地理的に正確とは限らない</span></li>
+      <li><strong>生成の再現性</strong><span class="note">同じプロンプトでも毎回異なる結果になる可能性</span></li>
+      <li><strong>細部のコントロール</strong><span class="note">Chisel Editorで改善中だが、精密な制御は困難</span></li>
+      <li><strong>API Rate Limit</strong><span class="note">非同期処理。大量リクエストには向かない</span></li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ═══ 3. CesiumJS ════════════════════════════════════════════════════ -->
+<div class="section-label">03 ── CesiumJS ディープダイブ</div>
+
+<div class="grid grid-full" style="margin-bottom:16px">
+  <div class="card amber" data-cat="cesium">
+    <div class="card-tag">OVERVIEW</div>
+    <h3><a href="https://cesium.com/platform/cesiumjs/">CesiumJS</a> ── 地球規模の3D地理空間エンジン</h3>
+    <p>OGC標準「<a href="https://cesium.com/why-cesium/3d-tiles/">3D Tiles</a>」の策定者が開発するオープンソースJavaScriptライブラリ。WebGLベースの3Dデジタル地球儀で、衛星画像・地形・都市3Dモデル・地理データをリアルタイム表示。</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">コア機能</h3>
+        <ul class="checklist">
+          <li><strong>3D地球儀</strong><span class="note">衛星画像+地形データの高精度レンダリング</span></li>
+          <li><strong>3D Tiles (OGC標準)</strong><span class="note">都市3Dモデルを地球規模でストリーミング配信</span></li>
+          <li><strong>Gaussian Splats対応</strong><span class="note">2025年から3DGSデータをCesium上に表示可能に</span></li>
+          <li><strong>時系列データ</strong><span class="note">Time-Dynamic 3D Tilesで時間変化を可視化</span></li>
+          <li><strong>パノラマ画像</strong><span class="note">Google Maps 360°パノラマをCesium内に統合</span></li>
+          <li><strong>Imagery Draping</strong><span class="note">任意の画像レイヤーを3D Tilesの上に重ねられる</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">エコシステム</h3>
+        <ul class="checklist">
+          <li><strong><a href="https://cesium.com/platform/cesium-ion/">Cesium ion</a></strong><span class="note">クラウドタイリング・ホスティング・アセットの一元管理</span></li>
+          <li><strong><a href="https://cesium.com/platform/cesium-for-unity/">Cesium for Unity</a></strong><span class="note">Unity内に3D地球儀を直接表示。WebGPU対応</span></li>
+          <li><strong>Cesium for Unreal</strong><span class="note">UE5のNanite/Lumenと地理空間データの統合</span></li>
+          <li><strong>Three.js統合</strong><span class="note">three-loader-3dtilesで3D TilesをThree.jsに</span></li>
+          <li><strong><a href="https://developers.google.com/maps/documentation/tile/3d-tiles-overview">Google Photorealistic 3D Tiles</a></strong><span class="note">現実都市をそのままCesiumに取り込み</span></li>
+          <li><strong>AI Search</strong><span class="note">Sandcastleでのセマンティック検索（2025末GA）</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-full" style="margin-bottom:16px">
+  <div class="card amber" data-cat="cesium">
+    <div class="card-tag">QUICK START</div>
+    <h3>CesiumJS クイックスタート ── 3ステップで地球儀を表示</h3>
+    <div class="code-block"><span class="comment">&lt;!-- STEP 1: CDNで読み込み --&gt;</span>
+&lt;<span class="keyword">script</span> src=<span class="string">"https://cesium.com/downloads/cesiumjs/releases/1.130/Build/Cesium/Cesium.js"</span>&gt;&lt;/<span class="keyword">script</span>&gt;
+&lt;<span class="keyword">link</span> rel=<span class="string">"stylesheet"</span> href=<span class="string">"https://cesium.com/downloads/cesiumjs/releases/1.130/Build/Cesium/Widgets/widgets.css"</span>&gt;
+
+<span class="comment">&lt;!-- STEP 2: コンテナ --&gt;</span>
+&lt;<span class="keyword">div</span> id=<span class="string">"cesiumContainer"</span> style=<span class="string">"width:100%;height:100vh"</span>&gt;&lt;/<span class="keyword">div</span>&gt;
+
+<span class="comment">&lt;!-- STEP 3: 初期化 --&gt;</span>
+&lt;<span class="keyword">script</span>&gt;
+  Cesium.Ion.defaultAccessToken = <span class="string">'YOUR_CESIUM_ION_TOKEN'</span>;
+
+  <span class="keyword">const</span> viewer = <span class="keyword">new</span> Cesium.<span class="func">Viewer</span>(<span class="string">'cesiumContainer'</span>, {
+    terrain: Cesium.Terrain.<span class="func">fromWorldTerrain</span>()
+  });
+
+  <span class="comment">// OSM Buildingsを追加（世界中の建物3D）</span>
+  <span class="keyword">const</span> buildings = <span class="keyword">await</span> Cesium.<span class="func">createOsmBuildingsAsync</span>();
+  viewer.scene.primitives.<span class="func">add</span>(buildings);
+
+  <span class="comment">// カメラを東京に飛ばす</span>
+  viewer.camera.<span class="func">flyTo</span>({
+    destination: Cesium.Cartesian3.<span class="func">fromDegrees</span>(<span class="num">139.6917</span>, <span class="num">35.6895</span>, <span class="num">2000</span>)
+  });
+&lt;/<span class="keyword">script</span>&gt;</div>
+    <div class="tip tip-amber"><strong>所要時間:</strong> Cesium ionでアカウント作成(無料) → トークン取得 → 上記コードをHTMLに貼る → ブラウザで開く。<strong>10分以内</strong>で3D地球儀が動く。</div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom:16px">
+  <div class="card amber" data-cat="cesium">
+    <div class="card-tag">DATA OVERLAY</div>
+    <h3>データを地球上に重ねる方法</h3>
+    <ul class="checklist">
+      <li><strong>GeoJSON</strong><span class="note">ポイント・ライン・ポリゴンの地理データ。最も汎用的</span></li>
+      <li><strong>CZML</strong><span class="note">Cesium独自の時系列JSON形式。アニメーション・タイムライン付きデータに最適</span></li>
+      <li><strong>KML / KMZ</strong><span class="note">Google Earth互換。既存データの再利用に</span></li>
+      <li><strong>3D Tiles</strong><span class="note">都市モデル・点群・メッシュの大規模ストリーミング</span></li>
+      <li><strong>Entity API</strong><span class="note">ピン・ラベル・ポリゴン・3Dモデルをコードで配置</span></li>
+      <li><strong>Imagery Provider</strong><span class="note">衛星画像・古地図・ヒートマップを地表に重ねる</span></li>
+      <li><strong>Gaussian Splats</strong><span class="note">3DGSデータを地理座標に配置して表示</span></li>
+    </ul>
+    <div class="code-block"><span class="comment">// GeoJSONデータを地球上にロード</span>
+<span class="keyword">const</span> dataSource = <span class="keyword">await</span> Cesium.GeoJsonDataSource.<span class="func">load</span>(
+  <span class="string">'./testimonies.geojson'</span>,
+  {
+    stroke: Cesium.Color.CYAN,
+    fill: Cesium.Color.CYAN.<span class="func">withAlpha</span>(<span class="num">0.3</span>),
+    strokeWidth: <span class="num">2</span>,
+    markerSize: <span class="num">20</span>
+  }
+);
+viewer.dataSources.<span class="func">add</span>(dataSource);
+
+<span class="comment">// 証言マーカーをEntity APIで配置</span>
+viewer.entities.<span class="func">add</span>({
+  position: Cesium.Cartesian3.<span class="func">fromDegrees</span>(<span class="num">132.4534</span>, <span class="num">34.3955</span>),
+  point: { pixelSize: <span class="num">12</span>, color: Cesium.Color.CYAN },
+  label: {
+    text: <span class="string">'証言者A: 1945年8月6日の記録'</span>,
+    font: <span class="string">'14px sans-serif'</span>,
+    verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+  }
+});</div>
+  </div>
+
+  <div class="card amber" data-cat="cesium">
+    <div class="card-tag">ADVANCED</div>
+    <h3>高度な機能</h3>
+    <ul class="checklist">
+      <li><strong>Google Photorealistic 3D Tiles</strong><span class="note">Cesium上でGoogle Mapsの実写3D都市を表示。APIキーが必要</span></li>
+      <li><strong>Time-Dynamic 3D Tiles</strong><span class="note">時間軸付きの3Dデータをタイムスライダーでアニメーション</span></li>
+      <li><strong>Imagery Draping</strong><span class="note">3D Tilesの上に任意の画像レイヤーを被せる（v1.130〜）</span></li>
+      <li><strong>Voxel Rendering</strong><span class="note">気象・地質などの体積データを3Dでレンダリング</span></li>
+      <li><strong>Cesium Mars</strong><span class="note">火星の地形3D Tilesetでミッション可視化</span></li>
+      <li><strong>WebGPU (Unity)</strong><span class="note">Cesium for UnityのWebGPUデプロイ対応</span></li>
+    </ul>
+    <div class="tip tip-amber"><strong>ハッカソンTips:</strong> OSM Buildings + GeoJSONデータ重畳が最速パス。Google Photorealistic 3D Tilesは審査員へのインパクト大だが、APIキー取得に時間がかかる場合あり。</div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom:40px">
+  <div class="card amber" data-cat="cesium">
+    <div class="card-tag">CESIUM FOR UNITY</div>
+    <h3>Cesium for Unity ── VRとの統合</h3>
+    <ul class="checklist">
+      <li><strong>インストール</strong><span class="note">Unity Package Managerから追加。オープンソース</span></li>
+      <li><strong>Cesium3DTileset</strong><span class="note">コンポーネントを追加して3D地球儀をシーンに表示</span></li>
+      <li><strong>CesiumGeoreference</strong><span class="note">Unity座標と地理座標の変換を自動処理</span></li>
+      <li><strong>XR Interaction Toolkit連携</strong><span class="note">VR内で地球を掴んで回転・ズームイン</span></li>
+      <li><strong>Google Photorealistic Tiles</strong><span class="note">現実都市をそのままVR空間に取り込み</span></li>
+      <li><strong>WebGPU出力</strong><span class="note">ブラウザ向けビルドでもCesiumの地球を表示可能</span></li>
+    </ul>
+  </div>
+
+  <div class="card amber" data-cat="cesium">
+    <div class="card-tag">CASE STUDIES</div>
+    <h3>Cesium × XR 実績</h3>
+    <ul class="checklist">
+      <li><strong>NASA XOSS</strong><span class="note">BuendeaがCesiumで月のデジタルツインをXR向けに構築</span></li>
+      <li><strong>ヒロシマ・アーカイブ</strong><span class="note">証言を地球上にマッピング。渡邉研の代表プロジェクト</span></li>
+      <li><strong>ウクライナ衛星画像マップ</strong><span class="note">衛星画像+3Dモデルで侵攻状況を可視化</span></li>
+      <li><strong>東日本大震災アーカイブ</strong><span class="note">被災者の行動軌跡を3D地形上に時系列表示</span></li>
+      <li><strong>Re:Earth</strong><span class="note">東大渡邉研発。Cesiumベースのノーコードデジタルアースプラットフォーム</span></li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ═══ 4. Omma (Spline) ══════════════════════════════════════════════ -->
+<div class="section-label">04 ── Omma by Spline ディープダイブ</div>
+
+<div class="grid grid-full" style="margin-bottom:16px">
+  <div class="card rose" data-cat="omma">
+    <div class="card-tag">OVERVIEW</div>
+    <h3><a href="https://omma.build">Omma</a> ── 自然言語からインタラクティブ3D体験を生成</h3>
+    <p><a href="https://spline.design">Spline</a>（300万人以上のデザイナーが利用するブラウザベース3Dデザインツール）が2026年3月にリリース。AIエージェントがコード生成・3Dメッシュ作成・画像生成を並列処理し、プロンプトからプロダクションレディなインタラクティブ体験を数分で構築。</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">Splineエコシステム</h3>
+        <ul class="checklist">
+          <li><strong><a href="https://spline.design">Spline</a></strong><span class="note">リアルタイム3Dデザインエディタ。Web上で動作</span></li>
+          <li><strong>Hana</strong><span class="note">2Dモーションデザインツール</span></li>
+          <li><strong><a href="https://omma.build">Omma</a></strong><span class="note">AI生成キャンバス。3D + モーション + UI統合</span></li>
+          <li><strong>Spline Viewer</strong><span class="note">&lt;spline-viewer&gt;タグでHTML内に直接埋め込み</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">AIマルチエージェント</h3>
+        <ul class="checklist">
+          <li><strong>コード生成エージェント</strong><span class="note">インタラクティブロジックを自動生成</span></li>
+          <li><strong>3Dメッシュ生成エージェント</strong><span class="note">3Dモデルをプロンプトから構築</span></li>
+          <li><strong>画像生成エージェント</strong><span class="note">テクスチャ・背景を自動生成</span></li>
+          <li><strong>並列処理</strong><span class="note">3エージェントが同時稼働して高速生成</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom:16px">
+  <div class="card rose" data-cat="omma">
+    <div class="card-tag">WORKFLOW</div>
+    <h3>Omma ワークフロー</h3>
+    <ul class="checklist">
+      <li><strong>1. プロンプト入力</strong><span class="note">「戦災の記録を展示するインタラクティブな3D空間」のように自然言語で指示</span></li>
+      <li><strong>2. AI生成（数分）</strong><span class="note">3つのAIエージェントが並列で3D + コード + 画像を生成</span></li>
+      <li><strong>3. 会話型イテレーション</strong><span class="note">「もっと暗い雰囲気に」「ボタンを追加して」とフィードバックで修正</span></li>
+      <li><strong>4. Splineエディタで編集</strong><span class="note">生成されたアセットをSplineのビジュアルエディタで細かく調整</span></li>
+      <li><strong>5. クロスプラットフォーム公開</strong><span class="note">Web / React / Next.js / XR に即座にデプロイ</span></li>
+    </ul>
+    <div class="tip tip-rose"><strong>Splineとの違い:</strong> Splineは手動でモデリング・アニメーションする3Dエディタ。Ommaはプロンプトから自動生成して、Splineエディタで仕上げるAIファーストのツール。</div>
+  </div>
+
+  <div class="card rose" data-cat="omma">
+    <div class="card-tag">EXPORT & INTEGRATION</div>
+    <h3>出力先・組み込み方法</h3>
+    <ul class="checklist">
+      <li><strong>Web埋め込み</strong><span class="note">&lt;spline-viewer&gt;タグまたはiframeで直接サイトに配置</span></li>
+      <li><strong>Vanilla.js Runtime</strong><span class="note">@splinetool/runtimeパッケージで完全制御</span></li>
+      <li><strong>React Component</strong><span class="note">@splinetool/react-splineでReactプロジェクトに統合</span></li>
+      <li><strong>Next.js対応</strong><span class="note">SSR/SSG対応のNext.js専用ライブラリ</span></li>
+      <li><strong>Code API</strong><span class="note">変数の調整・オブジェクト操作・トランジション・イベントリスナー</span></li>
+      <li><strong>XR出力</strong><span class="note">Splineランタイム経由でXRデバイスにも配信可能</span></li>
+    </ul>
+    <div class="code-block"><span class="comment">// React + Spline の基本統合</span>
+<span class="keyword">import</span> Spline <span class="keyword">from</span> <span class="string">'@splinetool/react-spline'</span>;
+
+<span class="keyword">export default function</span> <span class="func">Scene</span>() {
+  <span class="keyword">function</span> <span class="func">onLoad</span>(spline) {
+    <span class="comment">// Code APIで生成シーンを動的に操作</span>
+    <span class="keyword">const</span> obj = spline.<span class="func">findObjectByName</span>(<span class="string">'memorial-marker'</span>);
+    obj.position.y = <span class="num">100</span>;
+  }
+  <span class="keyword">return</span> &lt;<span class="func">Spline</span>
+    scene=<span class="string">"https://prod.spline.design/xxxxx/scene.splinecode"</span>
+    onLoad={onLoad}
+  /&gt;;
+}</div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom:40px">
+  <div class="card rose" data-cat="omma">
+    <div class="card-tag">SPLINE FEATURES</div>
+    <h3>Splineエディタの強力な機能</h3>
+    <ul class="checklist">
+      <li><strong>3Dモデリング</strong><span class="note">パラメトリック・ポリゴン編集・スカルプト</span></li>
+      <li><strong>アニメーション</strong><span class="note">キーフレームアニメーション・ステートマシン</span></li>
+      <li><strong>インタラクティビティ</strong><span class="note">ホバー・クリック・スクロール・ドラッグ・キーボード</span></li>
+      <li><strong>物理エンジン</strong><span class="note">リアルタイム物理シミュレーション（重力・衝突）</span></li>
+      <li><strong>ゲームコントロール</strong><span class="note">一人称・三人称カメラの移動操作</span></li>
+      <li><strong>リアルタイムコラボ</strong><span class="note">Figmaのように複数人で同時編集</span></li>
+      <li><strong>マテリアル・ライティング</strong><span class="note">PBRマテリアル・環境マップ・シャドウ</span></li>
+    </ul>
+  </div>
+
+  <div class="card rose" data-cat="omma">
+    <div class="card-tag">PRICING</div>
+    <h3>料金プラン</h3>
+    <table class="decision-table">
+      <thead><tr><th>ツール</th><th>無料枠</th><th>有料</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Spline (エディタ)</strong></td><td>無料で利用可</td><td>Team $9/月〜</td></tr>
+        <tr><td><strong>Omma (AI生成)</strong></td><td>-</td><td>$29/月〜 (Professional)</td></tr>
+      </tbody>
+    </table>
+    <div class="tip tip-rose"><strong>ハッカソン戦略:</strong> Spline自体は無料で使える。Omma($29/月)はAI生成の初速が欲しい場合に。手動でSplineエディタだけ使うなら完全無料でもインタラクティブ3DがWebに出せる。</div>
+  </div>
+</div>
+
+
+<!-- ═══ 5. KIRI Engine ═════════════════════════════════════════════════ -->
+<div class="section-label">05 ── KIRI Engine ディープダイブ</div>
+
+<div class="grid grid-full" style="margin-bottom:16px">
+  <div class="card cyan" data-cat="kiri">
+    <div class="card-tag">OVERVIEW</div>
+    <h3><a href="https://www.kiriengine.app/">KIRI Engine</a> ── スマホで完結する3Dスキャン・3DGS・フォトグラメトリ</h3>
+    <p>200万人以上が利用するモバイル3Dスキャンアプリ。写真/動画/LiDARから高品質な3Dモデルと3D Gaussian Splattingデータを生成。無料枠でも実用的なスキャンが可能で、ハッカソンの素材制作に最適。</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:12px">
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">スキャンモード</h3>
+        <ul class="checklist">
+          <li><strong>Photo Scan</strong><span class="note">写真からフォトグラメトリ。Free: 150枚/回</span></li>
+          <li><strong>NSR (Neural Surface)</strong><span class="note">NeRF統合。鏡面・光沢オブジェクトに対応</span></li>
+          <li><strong>3D Gaussian Splatting</strong><span class="note">動画からフォトリアルな3DGSを生成</span></li>
+          <li><strong>LiDAR Scan</strong><span class="note">iOS LiDARセンサー活用。AI強化で精度向上</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">v4.0 新機能 (2025.9)</h3>
+        <ul class="checklist">
+          <li><strong>AI PBRマテリアル</strong><span class="note">拡散モデルでプロ級PBRテクスチャを自動生成</span></li>
+          <li><strong>処理速度5倍</strong><span class="note">Photo Scan: 約10分→約2分に短縮</span></li>
+          <li><strong>ソース画像500枚</strong><span class="note">Pro: 300→500枚。Free: 100→150枚に増加</span></li>
+          <li><strong>無制限エクスポート</strong><span class="note">Free(Basic)ユーザーも無制限エクスポート可能に</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">出力形式</h3>
+        <ul class="checklist">
+          <li><strong>OBJ</strong><span class="note">最も汎用的。Blender/Maya/Unity/UE</span></li>
+          <li><strong>FBX</strong><span class="note">アニメーション対応。Unity/UE推奨</span></li>
+          <li><strong>GLB / glTF</strong><span class="note">Web標準。Three.js/A-Frame向き</span></li>
+          <li><strong>USDZ</strong><span class="note">Apple ARKit / Vision Pro向け</span></li>
+          <li><strong>PLY</strong><span class="note">3DGS/点群のネイティブ形式</span></li>
+          <li><strong>STL / XYZ</strong><span class="note">3Dプリント・点群処理向け</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-full" style="margin-bottom:16px">
+  <div class="card cyan" data-cat="kiri">
+    <div class="card-tag">WORKFLOW</div>
+    <h3>KIRI Engine 3Dスキャン完全ワークフロー</h3>
+    <div class="flow">
+      <div class="flow-step cyan">
+        <div class="num">STEP 01</div>
+        <div class="name">アプリ起動</div>
+        <div class="tool">iOS / Android 無料DL</div>
+      </div>
+      <div class="flow-step cyan">
+        <div class="num">STEP 02</div>
+        <div class="name">撮影</div>
+        <div class="tool">写真 or 動画 or LiDAR</div>
+      </div>
+      <div class="flow-step cyan">
+        <div class="num">STEP 03</div>
+        <div class="name">アップロード</div>
+        <div class="tool">クラウド処理 (約2分〜)</div>
+      </div>
+      <div class="flow-step cyan">
+        <div class="num">STEP 04</div>
+        <div class="name">プレビュー・編集</div>
+        <div class="tool">モバイルで全解像度確認</div>
+      </div>
+      <div class="flow-step cyan">
+        <div class="num">STEP 05</div>
+        <div class="name">エクスポート</div>
+        <div class="tool">OBJ/FBX/GLB/PLY...</div>
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">撮影のコツ</h3>
+        <ul class="checklist">
+          <li><strong>Photo Scan</strong><span class="note">対象の周りを一周しながら50〜150枚撮影。重なり70%以上が理想</span></li>
+          <li><strong>3DGS Scan</strong><span class="note">動画で対象をゆっくり一周。30秒〜2分。手ブレ厳禁</span></li>
+          <li><strong>LiDAR Scan</strong><span class="note">iPhone Pro/iPad Proで空間全体をスキャン。広い室内に最適</span></li>
+          <li><strong>照明</strong><span class="note">均一な照明が理想。強い影・逆光は避ける</span></li>
+          <li><strong>苦手な対象</strong><span class="note">鏡面・透明物体・極端に薄い物体・動く被写体</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">3DGS to Mesh 変換</h3>
+        <ul class="checklist">
+          <li><strong>業界初の変換機能</strong><span class="note">KIRI Engineが3DGS→メッシュ変換を初めて実装</span></li>
+          <li><strong>有効化方法</strong><span class="note">アップロード時に「3DGS to Mesh」オプションをONにする</span></li>
+          <li><strong>UV・テクスチャ自動生成</strong><span class="note">3DGSの色/輝度データからUVマップとテクスチャファイルを生成</span></li>
+          <li><strong>後処理可能</strong><span class="note">変換後はリトポロジー・スカルプト・UV編集・リギングが可能</span></li>
+          <li><strong>ゲームエンジン直行</strong><span class="note">OBJ/glTF変換後はUnity/UE/Godotに直接インポート</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom:16px">
+  <div class="card cyan" data-cat="kiri">
+    <div class="card-tag">FREE vs PRO</div>
+    <h3>料金プラン比較</h3>
+    <table class="decision-table">
+      <thead><tr><th>機能</th><th>Basic (無料)</th><th>Pro ($17.99/月)</th></tr></thead>
+      <tbody>
+        <tr><td>Photo Scan 枚数</td><td>150枚/回</td><td>500枚/回</td></tr>
+        <tr><td>3DGS Scan</td><td>-</td><td>対応</td></tr>
+        <tr><td>NSR (NeRF)</td><td>-</td><td>対応</td></tr>
+        <tr><td>LiDAR Scan</td><td>対応</td><td>対応 (AI強化)</td></tr>
+        <tr><td>テクスチャ解像度</td><td>4K</td><td>8K</td></tr>
+        <tr><td>AI PBR</td><td>-</td><td>対応</td></tr>
+        <tr><td>エクスポート</td><td>無制限 (v4.0〜)</td><td>無制限</td></tr>
+        <tr><td>Area Mode</td><td>-</td><td>LiDAR+写真の融合スキャン</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card cyan" data-cat="kiri">
+    <div class="card-tag">INTEGRATION</div>
+    <h3>他ツールとの連携</h3>
+    <ul class="checklist">
+      <li><strong>Unity</strong><span class="note">OBJ/FBX/GLBを直接インポート。3DGS PLYはUnityGaussianSplattingで表示</span></li>
+      <li><strong>Unreal Engine</strong><span class="note">FBX/OBJ取り込み。3DGSはXVERSE 3D-GS UE Pluginで</span></li>
+      <li><strong>Blender</strong><span class="note">全形式対応。KIRI公式の3DGS Blender Addonあり</span></li>
+      <li><strong>Three.js / A-Frame</strong><span class="note">GLB/glTFを直接ロード。WebXR体験に</span></li>
+      <li><strong>Apple AR</strong><span class="note">USDZ出力でiPhone/iPad/Vision ProのARに直結</span></li>
+      <li><strong>Cesium</strong><span class="note">メッシュ変換後にion経由で3D Tiles化し地球上に配置</span></li>
+    </ul>
+    <div class="tip"><strong>ハッカソン最速パス:</strong> KIRI Engine(Free) → Photo Scan → GLBエクスポート → Three.js/A-Frameでブラウザ表示。<strong>15分で完了</strong>。3DGSが必要ならPro($17.99/月)に。</div>
+  </div>
+</div>
+
+<div class="grid grid-full" style="margin-bottom:40px">
+  <div class="card cyan" data-cat="kiri">
+    <div class="card-tag">vs SCANIVERSE</div>
+    <h3>KIRI Engine vs Scaniverse 比較</h3>
+    <table class="decision-table">
+      <thead><tr><th>比較項目</th><th>KIRI Engine</th><th>Scaniverse</th></tr></thead>
+      <tbody>
+        <tr><td>プラットフォーム</td><td>iOS / Android / Web</td><td>iOS / Android</td></tr>
+        <tr><td>フォトグラメトリ</td><td>150枚(Free) / 500枚(Pro)</td><td>対応（枚数制限なし）</td></tr>
+        <tr><td>3DGS</td><td>Pro のみ（$17.99/月）</td><td>無料で対応</td></tr>
+        <tr><td>LiDAR</td><td>対応（AI強化あり）</td><td>対応</td></tr>
+        <tr><td>3DGS→Mesh変換</td><td>対応（業界初）</td><td>非対応</td></tr>
+        <tr><td>AI PBR生成</td><td>Pro対応（v4.0〜）</td><td>非対応</td></tr>
+        <tr><td>Web処理</td><td>対応（DSLR/ドローン写真に最適）</td><td>非対応</td></tr>
+        <tr><td>出力形式</td><td>OBJ/FBX/GLB/glTF/USDZ/PLY/STL/XYZ</td><td>PLY/OBJ/FBX/USDZ/SPZ</td></tr>
+        <tr><td>エクスポート制限</td><td>Free: 無制限 (v4.0〜)</td><td>無料で無制限</td></tr>
+        <tr><td>ハッカソン推奨度</td><td><span class="pill pill-green">メッシュ重視なら◎</span></td><td><span class="pill pill-green">3DGS重視なら◎</span></td></tr>
+      </tbody>
+    </table>
+    <div class="tip"><strong>使い分け:</strong> 3DGSをそのまま使うならScaniverse(無料)が手軽。メッシュ変換・PBR・Web処理・高解像度が欲しいならKIRI Engine。<strong>両方インストールしておくのが最強。</strong></div>
+  </div>
+</div>
+
+
+<!-- ═══ 6. 連携パターン ═══════════════════════════════════════════════ -->
+<div class="section-label">06 ── 4ツール連携パターン・ハッカソン戦略</div>
+
+<div class="grid grid-full" style="margin-bottom:16px">
+  <div class="card green" data-cat="compare">
+    <div class="card-tag">INTEGRATION PATTERNS</div>
+    <h3>実現できるプロジェクトパターン</h3>
+    <table class="decision-table">
+      <thead>
+        <tr>
+          <th>プロジェクト例</th>
+          <th>使用ツール</th>
+          <th>フロー</th>
+          <th>時間目安</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>「過去と現在の風景比較」VR</strong></td>
+          <td><span class="pill pill-cyan">KIRI</span> + <span class="pill pill-violet">World API</span></td>
+          <td>KIRI で現在をスキャン → World API で過去を生成 → 並べて表示</td>
+          <td>3〜5h</td>
+        </tr>
+        <tr>
+          <td><strong>「証言の地球マップ」Web</strong></td>
+          <td><span class="pill pill-amber">Cesium</span></td>
+          <td>CesiumJSで地球儀 → GeoJSONで証言配置 → Entity APIでUI</td>
+          <td>2〜4h</td>
+        </tr>
+        <tr>
+          <td><strong>「インタラクティブ3D展示」Web</strong></td>
+          <td><span class="pill pill-rose">Omma</span> + <span class="pill pill-cyan">KIRI</span></td>
+          <td>KIRI でスキャン → Splineに取り込み → Omma でUI生成 → Web公開</td>
+          <td>2〜4h</td>
+        </tr>
+        <tr>
+          <td><strong>「被災地デジタルツイン」フル体験</strong></td>
+          <td><span class="pill pill-amber">Cesium</span> + <span class="pill pill-cyan">KIRI</span> + <span class="pill pill-violet">World API</span></td>
+          <td>Cesiumで地球視点 → 現場にズームイン → KIRI 3DGS + World APIで過去再現</td>
+          <td>6〜10h</td>
+        </tr>
+        <tr>
+          <td><strong>「AI生成3D世界ツアー」Web/VR</strong></td>
+          <td><span class="pill pill-violet">World API</span> + <span class="pill pill-rose">Omma</span></td>
+          <td>World APIで世界生成 → Spline/OmmaでUI・ナビゲーション追加 → XR出力</td>
+          <td>3〜5h</td>
+        </tr>
+        <tr>
+          <td><strong>「現場3Dスキャン × 地球配置」</strong></td>
+          <td><span class="pill pill-cyan">KIRI</span> + <span class="pill pill-amber">Cesium</span></td>
+          <td>KIRI → メッシュ変換 → Cesium ion → 3D Tiles化 → 地球上に配置</td>
+          <td>3〜5h</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="grid grid-3" style="margin-bottom:16px">
+  <div class="card green" data-cat="compare">
+    <div class="card-tag">HACKATHON CHECKLIST</div>
+    <h3>事前準備チェックリスト</h3>
+    <ul class="checklist">
+      <li><strong>KIRI Engine インストール済み</strong><span class="note">iOS / Android。撮影テスト完了済みか確認</span></li>
+      <li><strong>Cesium ion アカウント作成済み</strong><span class="note">無料。アクセストークン取得済みか確認</span></li>
+      <li><strong>World Labs アカウント作成済み</strong><span class="note">Freeプランで4回の生成枠を確保</span></li>
+      <li><strong>Spline アカウント作成済み</strong><span class="note">無料。Omma使用時は$29/月プラン</span></li>
+      <li><strong>デプロイ先を決定</strong><span class="note">Vercel / GitHub Pages / Netlify</span></li>
+      <li><strong>フォールバック動画</strong><span class="note">デバイスが動かない場合のデモ用録画</span></li>
+    </ul>
+  </div>
+
+  <div class="card green" data-cat="compare">
+    <div class="card-tag">QUICK WINS</div>
+    <h3>最速で成果を出すパス</h3>
+    <ul class="checklist">
+      <li><strong>30分コース</strong><span class="note">CesiumJS + GeoJSON → 地球上にデータ可視化</span></li>
+      <li><strong>1時間コース</strong><span class="note">KIRI Scan → GLB → A-Frame WebXR表示</span></li>
+      <li><strong>2時間コース</strong><span class="note">Ommaでインタラクティブ3D体験をAI生成</span></li>
+      <li><strong>3時間コース</strong><span class="note">World APIで架空世界を生成 → VRビュー公開</span></li>
+      <li><strong>半日コース</strong><span class="note">Cesium + KIRI + World API のフル連携</span></li>
+    </ul>
+  </div>
+
+  <div class="card green" data-cat="compare">
+    <div class="card-tag">PITCH TIPS</div>
+    <h3>審査員に刺さるポイント</h3>
+    <ul class="checklist">
+      <li><strong>「なぜ3D/XRで作るのか」</strong><span class="note">2D写真・映像では不可能な体験を明確に</span></li>
+      <li><strong>URL一本で体験可能</strong><span class="note">CesiumJS / Spline / A-Frame ならWebで完結</span></li>
+      <li><strong>AI活用を明示</strong><span class="note">World API / Omma のAI生成を技術的差別化に</span></li>
+      <li><strong>現実↔仮想の融合</strong><span class="note">KIRIの実写スキャン + AIの想像力 = 唯一無二</span></li>
+      <li><strong>体験のピーク設計</strong><span class="note">「この瞬間に何を感じるか」を言語化する</span></li>
+    </ul>
+  </div>
+</div>
+
+<div class="grid grid-full" style="margin-bottom:40px">
+  <div class="card green" data-cat="compare">
+    <div class="card-tag">RESOURCE LINKS</div>
+    <h3>公式リソース一覧</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px">
+      <div>
+        <h3 style="font-size:12px; margin-bottom:6px; color:var(--violet)">World API</h3>
+        <ul class="checklist">
+          <li><a href="https://www.worldlabs.ai/blog/announcing-the-world-api">公式ブログ</a></li>
+          <li><a href="https://docs.worldlabs.ai/">APIドキュメント</a></li>
+          <li><a href="https://marble.worldlabs.ai/">Marble (アプリ)</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:12px; margin-bottom:6px; color:var(--amber)">CesiumJS</h3>
+        <ul class="checklist">
+          <li><a href="https://cesium.com/learn/cesiumjs-learn/cesiumjs-quickstart/">クイックスタート</a></li>
+          <li><a href="https://cesium.com/platform/cesium-ion/">Cesium ion</a></li>
+          <li><a href="https://github.com/CesiumGS/cesium">GitHub</a></li>
+          <li><a href="https://cesium.com/platform/cesium-for-unity/">Cesium for Unity</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:12px; margin-bottom:6px; color:var(--rose)">Omma / Spline</h3>
+        <ul class="checklist">
+          <li><a href="https://omma.build">Omma</a></li>
+          <li><a href="https://spline.design">Spline エディタ</a></li>
+          <li><a href="https://docs.spline.design/">ドキュメント</a></li>
+          <li><a href="https://github.com/splinetool/react-spline">React Spline (GitHub)</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:12px; margin-bottom:6px; color:var(--cyan)">KIRI Engine</h3>
+        <ul class="checklist">
+          <li><a href="https://www.kiriengine.app/">公式サイト</a></li>
+          <li><a href="https://apps.apple.com/us/app/kiri-engine-3d-scanner-lidar/id1577127142">App Store</a></li>
+          <li><a href="https://play.google.com/store/apps/details?id=com.kiriengine.app">Google Play</a></li>
+          <li><a href="https://www.kiriengine.app/blog/kiri-engine-4.0-release">v4.0リリースノート</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- FOOTER -->
+<footer>
+  <span>XR開発チートシート v2.0 ── 東京大学大学院 情報学環 渡邉英徳研究室 / komanbe</span>
+  <span><a href="https://www.ntv.co.jp/hackathon/">クリエイティブメディアハッカソン 2026</a></span>
+</footer>
+
+</div>
+
+<script>
+  function filterCards(cat) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    document.querySelectorAll('.card[data-cat]').forEach(card => {
+      if (cat === 'all' || card.dataset.cat === cat) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+  }
+</script>
+</body>
+</html>
