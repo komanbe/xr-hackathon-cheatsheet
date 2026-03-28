@@ -341,7 +341,7 @@
 <header>
   <div class="header-top">
     <span class="badge">CHEAT SHEET v2.0</span>
-    <span class="badge" style="border-color:var(--violet);color:var(--violet);background:var(--violet-dim)"><a href="https://www.ntv.co.jp/hackathon/">クリエイティブメディアハッカソン</a></span>
+    <span class="badge" style="border-color:var(--violet);color:var(--violet);background:var(--violet-dim)"><a href="https://peatix.com/event/4826337">クリエイティブメデ��アハッカソ���</a></span>
   </div>
   <h1>XR開発 ディープリファレンス</h1>
   <p class="subtitle">// World API / CesiumJS / Omma (Spline) / KIRI Engine ── 4つの武器を深く理解する //</p>
@@ -354,6 +354,7 @@
   <button class="filter-btn" onclick="filterCards('cesium')">CesiumJS</button>
   <button class="filter-btn" onclick="filterCards('omma')">Omma / Spline</button>
   <button class="filter-btn" onclick="filterCards('kiri')">KIRI Engine</button>
+  <button class="filter-btn" onclick="filterCards('arrival')">Arrival Space</button>
   <button class="filter-btn" onclick="filterCards('compare')">比較・連携</button>
 </div>
 
@@ -409,6 +410,52 @@
     <div class="tip" style="margin-top:10px"><strong>Basic:</strong> 無料(150枚/回・無制限エクスポート) / <strong>Pro:</strong> $17.99/月(3DGS・AI PBR対応)</div>
   </div>
 
+  <div class="card earth" data-cat="arrival" style="border-left:3px solid var(--earth)">
+    <div class="card-tag">Arrival Space</div>
+    <h3 style="margin-bottom:12px"><a href="https://arrival.space">Arrival.Space</a></h3>
+    <p style="color:var(--earth);font-weight:700;font-size:13px;margin-bottom:10px">こんな方におすすめ:</p>
+    <ul class="checklist">
+      <li><strong>3DGS(Gaussian Splat)をWebで公開・共有したい</strong><span class="note">PLY/SPZをアップロードするだけ。編集・共有・VR表示</span></li>
+      <li><strong>コーディングなしで3DGSの展示空間を作りたい</strong><span class="note">SuperSplat統合で直接編集。Vibesでプロンプトから演出追加</span></li>
+      <li><strong>スキャンデータをアバターで歩ける空間にしたい</strong><span class="note">自動衝突判定。モバイル/PC/VR全対応</span></li>
+    </ul>
+    <div class="tip tip-green" style="margin-top:10px"><strong>無料で利用可。</strong> KIRI Engine / Scaniverse でスキャン → PLY/SPZアップロード → 即Web公開</div>
+  </div>
+
+</div>
+
+
+<!-- ═══ 00. 活用データソース例 ═══════════════════════════════════════── -->
+<div class="section-label">00 ── 組み合わせると強いデータソース例</div>
+
+<div class="grid grid-2" style="margin-bottom:40px">
+  <div class="card green" data-cat="compare">
+    <div class="card-tag">GEO / SATELLITE DATA</div>
+    <h3>衛星画像・地理オープンデータ</h3>
+    <p style="margin-bottom:6px">CesiumJS や地理系プロジェクトと組み合わせて使える無料データ:</p>
+    <ul class="checklist">
+      <li><strong><a href="https://apps.sentinel-hub.com/eo-browser/">Sentinel Hub EO Browser</a></strong><span class="note">ESA Sentinel衛星画像を無料閲覧・DL。時系列比較に最適</span></li>
+      <li><strong><a href="https://earthexplorer.usgs.gov/">USGS Earth Explorer</a></strong><span class="note">Landsat等の衛星画像アーカイブ。長期変化の分析に</span></li>
+      <li><strong><a href="https://developers.google.com/earth-engine">Google Earth Engine</a></strong><span class="note">衛星画像の大規模解析。研究用途無料</span></li>
+      <li><strong><a href="https://www.geospatial.jp/ckan/dataset/plateau">PLATEAU (国交省)</a></strong><span class="note">日本の都市3Dモデル。3D Tiles形式。Cesiumに直接読込可</span></li>
+      <li><strong><a href="https://tellus.xdata.nict.jp/">Tellus</a></strong><span class="note">日本の衛星データPF。ASNARO/だいち等の画像</span></li>
+      <li><strong><a href="https://www.openstreetmap.org/">OpenStreetMap</a></strong><span class="note">地図データ。CesiumのOSM Buildings元データ</span></li>
+    </ul>
+  </div>
+
+  <div class="card green" data-cat="compare">
+    <div class="card-tag">3D / CREATIVE DATA</div>
+    <h3>3D素材・クリエイティブ素材</h3>
+    <p style="margin-bottom:6px">World API / Omma / KIRI と組み合わせて使えるリソース:</p>
+    <ul class="checklist">
+      <li><strong><a href="https://sketchfab.com/">Sketchfab</a></strong><span class="note">数百万の3Dモデル。GLB/glTF DL可。CC素材多数</span></li>
+      <li><strong><a href="https://polyhaven.com/">Poly Haven</a></strong><span class="note">CC0のHDRI・テクスチャ・3Dモデル。完全無料</span></li>
+      <li><strong><a href="https://developers.google.com/maps/documentation/tile/3d-tiles-overview">Google Photorealistic 3D Tiles</a></strong><span class="note">現実都市の3DモデルをCesium/Three.jsに取り込み</span></li>
+      <li><strong><a href="https://www.mixamo.com/">Mixamo</a></strong><span class="note">Adobe提供。3Dキャラのリギング・アニメを自動生成</span></li>
+      <li><strong><a href="https://freesound.org/">Freesound</a></strong><span class="note">CC音源ライブラリ。空間音響素材に</span></li>
+      <li><strong><a href="https://lumalabs.ai/genie">Luma Genie</a></strong><span class="note">テキストから3Dモデルを生成。glTF出力</span></li>
+    </ul>
+  </div>
 </div>
 
 
@@ -466,9 +513,18 @@
           <td>基本無料 / Pro $17.99/月</td>
           <td><span class="pill pill-green">◎</span></td>
         </tr>
+        <tr>
+          <td><strong><a href="https://arrival.space">Arrival Space</a></strong></td>
+          <td><span class="pill pill-earth">3DGS共有PF</span></td>
+          <td>3DGSをWeb上で公開・編集・共有</td>
+          <td>PLY / SPZ (3DGS)</td>
+          <td>Web埋め込み / VR空間</td>
+          <td>無料〜</td>
+          <td><span class="pill pill-green">◎</span></td>
+        </tr>
       </tbody>
     </table>
-    <div class="tip"><strong>組み合わせの妙:</strong> KIRI Engineで現実をスキャン → World APIで世界を拡張 → CesiumJSで地球上に配置 → Ommaでインタラクティブ体験に仕上げる。4ツールは競合ではなく補完関係。</div>
+    <div class="tip"><strong>組み合わせの妙:</strong> KIRI Engineで現実をスキャン → Arrival Spaceで即Web公開 → World APIで世界を拡張 → CesiumJSで地球上に配置 → Ommaでインタラクティブ体験に仕上げる。5ツールは競合ではなく補完関係。</div>
   </div>
 </div>
 
@@ -1018,7 +1074,93 @@ viewer.entities.<span class="func">add</span>({
 </div>
 
 
-<!-- ═══ 6. 連携パターン ═══════════════════════════════════════════════ -->
+<!-- ═══ 5.5. Arrival Space ═════════════════════════════════════════════ -->
+<div class="section-label">06 ── Arrival Space ディープダイブ</div>
+
+<div class="grid grid-full" style="margin-bottom:16px">
+  <div class="card earth" data-cat="arrival">
+    <div class="card-tag">OVERVIEW</div>
+    <h3><a href="https://arrival.space">Arrival.Space</a> ── 3DGSをWebで公開・編集・体験する最速プラットフォーム</h3>
+    <p>3D Gaussian Splattingに特化したソーシャルWebプラットフォーム。PLY/SPZファイルをアップロードするだけで、ブラウザ上で閲覧・編集・共有・VR体験ができる。モバイル/PC/VRヘッドセット全対応。</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">コア機能</h3>
+        <ul class="checklist">
+          <li><strong>3DGSホスティング</strong><span class="note">PLY/SPZをアップロード → URL発行 → 即共有</span></li>
+          <li><strong>SuperSplat統合</strong><span class="note">プラットフォーム内で3DGSを直接編集・クリーンアップ</span></li>
+          <li><strong>Spherical Harmonics</strong><span class="note">最大3バンドのSH対応で高品質ビジュアル</span></li>
+          <li><strong>自動衝突判定</strong><span class="note">アバターがSplatシーン内をリアルに歩ける</span></li>
+          <li><strong>Vibes (プロンプト演出)</strong><span class="note">テキストプロンプトでシーンにエフェクトやロジックを追加</span></li>
+          <li><strong>SPZファイル完全対応</strong><span class="note">アップロード・編集・変換すべて対応</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:13px; margin-bottom:8px">技術スタック</h3>
+        <ul class="checklist">
+          <li><strong>PlayCanvas Engine</strong><span class="note">WebGL/WebGPU/WebXR/glTF対応のWebグラフィックスエンジン</span></li>
+          <li><strong>HDR対応</strong><span class="note">ハイダイナミックレンジレンダリング</span></li>
+          <li><strong>Splat Data Protection</strong><span class="note">クリエイターの3DGSデータを保護する仕組み</span></li>
+          <li><strong>splat-transform (OSS)</strong><span class="note"><a href="https://github.com/arrival-space/splat-transform">GitHub公開</a>のCLIツール。3DGSフォーマット変換</span></li>
+          <li><strong>spz-js (OSS)</strong><span class="note"><a href="https://github.com/arrival-space/spz-js">GitHub公開</a>。SPZ↔PLYをJSで変換</span></li>
+          <li><strong>マルチデバイス</strong><span class="note">モバイル / PC / VRヘッドセットすべて対応</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom:16px">
+  <div class="card earth" data-cat="arrival">
+    <div class="card-tag">WORKFLOW</div>
+    <h3>Arrival Space 利用フロー</h3>
+    <ul class="checklist">
+      <li><strong>1. アカウント作成</strong><span class="note"><a href="https://arrival.space">arrival.space</a> で自分のSpaceを作成（無料）</span></li>
+      <li><strong>2. 3DGSデータをアップロード</strong><span class="note">PLY/SPZファイルをドラッグ&ドロップ。複数ファイル対応</span></li>
+      <li><strong>3. SuperSplatで編集</strong><span class="note">不要な部分のクロップ・ノイズ除去をブラウザ内で完結</span></li>
+      <li><strong>4. Vibesで演出追加</strong><span class="note">テキストプロンプトでエフェクト・ロジックを生成</span></li>
+      <li><strong>5. URLで共有</strong><span class="note">arrival.space/あなたのID でアクセス可能。VRヘッドセットからも</span></li>
+    </ul>
+    <div class="tip tip-green"><strong>KIRI / Scaniverse → Arrival Space:</strong> スキャンアプリでPLY/SPZをエクスポート → Arrival Spaceにアップロード → 数分で3DGS展示空間が完成。コード不要。</div>
+  </div>
+
+  <div class="card earth" data-cat="arrival">
+    <div class="card-tag">VS OTHER VIEWERS</div>
+    <h3>3DGS公開手段の比較</h3>
+    <table class="decision-table">
+      <thead><tr><th>手段</th><th>特徴</th><th>適性</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Arrival Space</strong></td><td>アップロードのみ。編集・VR・アバター歩行対応</td><td><span class="pill pill-green">最速公開</span></td></tr>
+        <tr><td><strong>Luma AI Web</strong></td><td>Luma撮影データのWeb公開。埋め込み可</td><td><span class="pill pill-green">Luma利用時</span></td></tr>
+        <tr><td><strong>Three.js + gsplat</strong></td><td>コードで自由制御。WebXR統合可</td><td><span class="pill pill-amber">カスタム向け</span></td></tr>
+        <tr><td><strong>Unity GaussianSplatting</strong></td><td>Unityシーンに組み込み。VRビルド可</td><td><span class="pill pill-amber">Unity開発時</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="grid grid-full" style="margin-bottom:40px">
+  <div class="card earth" data-cat="arrival">
+    <div class="card-tag">RESOURCES</div>
+    <h3>Arrival Space 公式リソース</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px">
+      <ul class="checklist">
+        <li><a href="https://arrival.space">公式サイト</a></li>
+      </ul>
+      <ul class="checklist">
+        <li><a href="https://codex.arrival.space/">マニュアル (Codex)</a></li>
+      </ul>
+      <ul class="checklist">
+        <li><a href="https://github.com/arrival-space">GitHub (OSS)</a></li>
+      </ul>
+      <ul class="checklist">
+        <li><a href="https://radiancefields.com/platforms/arrival-space">Radiance Fields 紹介</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ 7. 連携パターン ═══════════════════════════════════════════════ -->
 <div class="section-label">06 ── 4ツール連携パターン・ハッカソン戦略</div>
 
 <div class="grid grid-full" style="margin-bottom:16px">
@@ -1071,6 +1213,12 @@ viewer.entities.<span class="func">add</span>({
           <td>KIRI → メッシュ変換 → Cesium ion → 3D Tiles化 → 地球上に配置</td>
           <td>3〜5h</td>
         </tr>
+        <tr>
+          <td><strong>「3DGSスキャンをWeb展示」最速パス</strong></td>
+          <td><span class="pill pill-cyan">KIRI</span> + <span class="pill pill-earth">Arrival</span></td>
+          <td>KIRI/Scaniverse → PLYエクスポート → Arrival Spaceにアップロード → URL共有</td>
+          <td>30分〜1h</td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -1085,6 +1233,7 @@ viewer.entities.<span class="func">add</span>({
       <li><strong>Cesium ion アカウント作成済み</strong><span class="note">無料。アクセストークン取得済みか確認</span></li>
       <li><strong>World Labs アカウント作成済み</strong><span class="note">Freeプランで4回の生成枠を確保</span></li>
       <li><strong>Spline アカウント作成済み</strong><span class="note">無料。Omma使用時は$29/月プラン</span></li>
+      <li><strong>Arrival Space アカウント作成済み</strong><span class="note">無料。3DGS公開用のSpace URLを確保</span></li>
       <li><strong>デプロイ先を決定</strong><span class="note">Vercel / GitHub Pages / Netlify</span></li>
       <li><strong>フォールバック動画</strong><span class="note">デバイスが動かない場合のデモ用録画</span></li>
     </ul>
@@ -1094,6 +1243,7 @@ viewer.entities.<span class="func">add</span>({
     <div class="card-tag">QUICK WINS</div>
     <h3>最速で成果を出すパス</h3>
     <ul class="checklist">
+      <li><strong>15分コース</strong><span class="note">KIRI/Scaniverse → PLY → Arrival Space にアップ → URL共有</span></li>
       <li><strong>30分コース</strong><span class="note">CesiumJS + GeoJSON → 地球上にデータ可視化</span></li>
       <li><strong>1時間コース</strong><span class="note">KIRI Scan → GLB → A-Frame WebXR表示</span></li>
       <li><strong>2時間コース</strong><span class="note">Ommaでインタラクティブ3D体験をAI生成</span></li>
@@ -1119,7 +1269,7 @@ viewer.entities.<span class="func">add</span>({
   <div class="card green" data-cat="compare">
     <div class="card-tag">RESOURCE LINKS</div>
     <h3>公式リソース一覧</h3>
-    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px">
+    <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:12px">
       <div>
         <h3 style="font-size:12px; margin-bottom:6px; color:var(--violet)">World API</h3>
         <ul class="checklist">
@@ -1143,7 +1293,7 @@ viewer.entities.<span class="func">add</span>({
           <li><a href="https://omma.build">Omma</a></li>
           <li><a href="https://spline.design">Spline エディタ</a></li>
           <li><a href="https://docs.spline.design/">ドキュメント</a></li>
-          <li><a href="https://github.com/splinetool/react-spline">React Spline (GitHub)</a></li>
+          <li><a href="https://github.com/splinetool/react-spline">React Spline</a></li>
         </ul>
       </div>
       <div>
@@ -1152,7 +1302,15 @@ viewer.entities.<span class="func">add</span>({
           <li><a href="https://www.kiriengine.app/">公式サイト</a></li>
           <li><a href="https://apps.apple.com/us/app/kiri-engine-3d-scanner-lidar/id1577127142">App Store</a></li>
           <li><a href="https://play.google.com/store/apps/details?id=com.kiriengine.app">Google Play</a></li>
-          <li><a href="https://www.kiriengine.app/blog/kiri-engine-4.0-release">v4.0リリースノート</a></li>
+          <li><a href="https://www.kiriengine.app/blog/kiri-engine-4.0-release">v4.0リリース</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:12px; margin-bottom:6px; color:var(--earth)">Arrival Space</h3>
+        <ul class="checklist">
+          <li><a href="https://arrival.space">公式サイト</a></li>
+          <li><a href="https://codex.arrival.space/">マニュアル</a></li>
+          <li><a href="https://github.com/arrival-space">GitHub (OSS)</a></li>
         </ul>
       </div>
     </div>
@@ -1163,7 +1321,7 @@ viewer.entities.<span class="func">add</span>({
 <!-- FOOTER -->
 <footer>
   <span>XR開発チートシート v2.0 ── 東京大学大学院 情報学環 渡邉英徳研究室 / komanbe</span>
-  <span><a href="https://www.ntv.co.jp/hackathon/">クリエイティブメディアハッカソン 2026</a></span>
+  <span><a href="https://peatix.com/event/4826337">クリエイティブメディアハッカソン 2026</a></span>
 </footer>
 
 </div>
